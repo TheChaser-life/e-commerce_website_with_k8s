@@ -37,10 +37,6 @@ package-lock.json
 .yarn/
 .pnpm-store/
 
-# Docker
-**/Dockerfile
-**/docker-compose*.yml
-
 # Helm
 **/charts/
 **/tmp/
@@ -55,6 +51,7 @@ Desktop.ini
 # Environment files
 .env
 .env.*
+**/application.properties
 
 # Misc
 *.swp

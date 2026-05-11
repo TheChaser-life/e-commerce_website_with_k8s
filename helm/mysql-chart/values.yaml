@@ -1,5 +1,5 @@
 auth:
-  rootPassword: "password"
+  rootPasswordSecret: "mysql-secret"
   database: "ecommerce"
 
 primary:
