@@ -1,0 +1,21 @@
+replicaCount: 1
+
+image:
+  repository: your-registry/frontend
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: ""
+  annotations: {}
+  hosts:
+    - host: shopnow.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []

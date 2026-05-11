@@ -1,0 +1,8 @@
+auth:
+  rootPassword: "password"
+  database: "ecommerce"
+
+primary:
+  persistence:
+    enabled: true
+    size: 8Gi
