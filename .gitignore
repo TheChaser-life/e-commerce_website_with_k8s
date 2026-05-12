@@ -60,3 +60,6 @@ Desktop.ini
 *.bak
 *.orig
 actions-runner/
+
+# helm
+get_helm.sh

@@ -14,6 +14,7 @@ env:
   IMAGE_TAG: ${{ github.sha }}
 
 jobs:
+  # job lọc ra các service có sự thay đổi source code 
   Detect-source-code-changes:
     runs-on: ubuntu-latest
     outputs: 
@@ -31,6 +32,7 @@ jobs:
             user-service: 'backend/user-service/**'
             frontend: 'frontend/**'
   
+  # job lọc ra các service có sự thay đổi manifest
   Detect-manifest-changes:
     runs-on: ubuntu-latest
     outputs: 
@@ -48,9 +50,11 @@ jobs:
             user-service: 'helm/user-service/**'
             frontend: 'helm/frontend/**'
 
+  # job build và push image
   build-push:
     needs: Detect-source-code-changes
-    if: needs.Detect-source-code-changes.outputs.changed-source-code-paths != '[]'
+    if: | # điều kiện chạy job này là có sự thay đổi source code
+      needs.Detect-source-code-changes.outputs.changed-source-code-paths != '[]' 
     name: Build and push Docker images
     runs-on: ubuntu-latest
 
@@ -77,6 +81,7 @@ jobs:
           java-version: 17
           cache: maven
 
+      # Build file thực thi cho các java service 
       - name: Download Maven dependencies and Compile source code
         run: |
           for path in ${{ env.CHANGED_SOURCE_CODE_PATHS }}; do
@@ -105,15 +110,17 @@ jobs:
             docker push ${{ env.DOCKERHUB_REPO }}/$path:${{ env.IMAGE_TAG }}
           done
 
+  # Job deploy các service vào cluster bằng helm và push chart vào docker hub
   Redeploy-service-deployments-and-manifests:
     needs: [Detect-source-code-changes, Detect-manifest-changes, build-push]
     if: |
-      always() &&
-      !contains(needs.*.result, 'failure') &&
-      !contains(needs.*.result, 'cancelled') &&
-      (needs.Detect-source-code-changes.outputs.changed-source-code-paths != '[]' || 
+      always() && # luôn chạy job này cho dù job trước có bị skip
+      !contains(needs.*.result, 'failure') && # không có job nào bị lỗi
+      !contains(needs.*.result, 'cancelled') && # không có job nào bị huỷ
+      (needs.Detect-source-code-changes.outputs.changed-source-code-paths != '[]' || # có sự thay đổi source code hoặc manifest
        needs.Detect-manifest-changes.outputs.changed-manifest-paths != '[]')
     runs-on: [self-hosted, linux]
+    name: Redeploy service deployments and manifests
     env:
       CHANGED_MANIFESTS: ${{ needs.Detect-manifest-changes.outputs.changed-manifest-paths }}
       CHANGED_SOURCE_CODE_PATHS: ${{ needs.Detect-source-code-changes.outputs.changed-source-code-paths }}
@@ -123,23 +130,44 @@ jobs:
 
       - name: Make list of changed manifests
         run: |
-          CHANGED_MANIFESTS=$(echo '${{ env.CHANGED_MANIFESTS }}' | jq -r '. | join(" ")')
-          echo "CHANGED_MANIFESTS=$CHANGED_MANIFESTS" >> $GITHUB_ENV
-          echo "Changed manifest paths: $CHANGED_MANIFESTS"
-
-          CHANGED_SOURCE_CODE_PATHS=$(echo '${{ env.CHANGED_SOURCE_CODE_PATHS }}' | jq -r '. | join(" ")')
-          echo "CHANGED_SOURCE_CODE_PATHS=$CHANGED_SOURCE_CODE_PATHS" >> $GITHUB_ENV
-          echo "Changed source code paths: $CHANGED_SOURCE_CODE_PATHS"
+          # Parse JSON outputs
+          MANIFESTS=$(echo '${{ env.CHANGED_MANIFESTS }}' | jq -r '. | join(" ")')
+          SOURCES=$(echo '${{ env.CHANGED_SOURCE_CODE_PATHS }}' | jq -r '. | join(" ")')
           
-      - name: Redeploy service deployments 
+          # Create unique list of services để tránh bị trùng, push 1 chart 2 lần
+          UNIQUE=$(echo "$MANIFESTS $SOURCES" | tr ' ' '\n' | grep -v '^$' | sort -u | xargs)
+          
+          echo "CHANGED_MANIFESTS=$MANIFESTS" >> $GITHUB_ENV
+          echo "CHANGED_SOURCE_CODE_PATHS=$SOURCES" >> $GITHUB_ENV
+          echo "UNIQUE_SERVICES=$UNIQUE" >> $GITHUB_ENV
+          
+          echo "Unique services to process: $UNIQUE"
+          
+      - name: Redeploy services with Helm
         run: |
-          for path in ${{ env.CHANGED_SOURCE_CODE_PATHS }}; do
-            kubectl set image deployment/$path $path=${{ env.DOCKERHUB_REPO }}/$path:${{ env.IMAGE_TAG }} --namespace default
+          for service in ${{ env.UNIQUE_SERVICES }}; do
+            echo "Deploying/Updating service: $service"
+            helm upgrade --install $service ./helm/${service}-chart \  # Update các chart của các service ở local cluster
+              --set image.repository=${{ env.DOCKERHUB_REPO }}/$service \
+              --set image.tag=${{ env.IMAGE_TAG }} \
+              --namespace default
           done
 
-      - name: Redeploy service manifests 
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build And Push Helm Charts to Docker Hub
         run: |
-          for path in ${{ env.CHANGED_MANIFESTS }}; do
-            kubectl apply -f helm/$path --namespace default
-          done 
+          echo ${{ secrets.DOCKERHUB_TOKEN }} | helm registry login registry-1.docker.io -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+          
+          for service in ${{ env.UNIQUE_SERVICES }}; do
+            echo "Packaging and pushing chart for: $service"
+            helm package ./helm/${service}-chart # đóng gói các file manifest thành file .tgz
+            helm push ${service}-chart-*.tgz oci://registry-1.docker.io/${{ secrets.DOCKERHUB_USERNAME }} # push file .tgz vào docker hub
+            rm *.tgz
+          done
 
