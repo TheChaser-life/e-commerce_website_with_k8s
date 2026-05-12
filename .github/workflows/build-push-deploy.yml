@@ -106,7 +106,7 @@ jobs:
             docker push ${{ env.DOCKERHUB_REPO }}/$path:${{ env.IMAGE_TAG }}
           done
 
-  Redeploy service deployments and manifests:
+  Redeploy-service-deployments-and-manifests:
     needs: [Detect-source-code-changes, Detect-manifest-changes, build-push]
     if: |
       always() &&
