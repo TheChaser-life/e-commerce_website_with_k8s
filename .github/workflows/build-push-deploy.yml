@@ -113,11 +113,14 @@ jobs:
   # Job deploy các service vào cluster bằng helm và push chart vào docker hub
   Redeploy-service-deployments-and-manifests:
     needs: [Detect-source-code-changes, Detect-manifest-changes, build-push]
+    # Cho phép kiểm tra jib ngay cả khi job trước bị skip
+    # và không có job nào bị lỗi hoặc bị huỷ
+    # có sự thay đổi source code hoặc manifest
     if: |
-      always() && # luôn chạy job này cho dù job trước có bị skip
-      !contains(needs.*.result, 'failure') && # không có job nào bị lỗi
-      !contains(needs.*.result, 'cancelled') && # không có job nào bị huỷ
-      (needs.Detect-source-code-changes.outputs.changed-source-code-paths != '[]' || # có sự thay đổi source code hoặc manifest
+      always() &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled') &&
+      (needs.Detect-source-code-changes.outputs.changed-source-code-paths != '[]' || 
        needs.Detect-manifest-changes.outputs.changed-manifest-paths != '[]')
     runs-on: [self-hosted, linux]
     name: Redeploy service deployments and manifests
@@ -147,7 +150,8 @@ jobs:
         run: |
           for service in ${{ env.UNIQUE_SERVICES }}; do
             echo "Deploying/Updating service: $service"
-            helm upgrade --install $service ./helm/${service}-chart \  # Update các chart của các service ở local cluster
+            # Update các chart của các service ở local cluster
+            helm upgrade --install $service ./helm/${service}-chart \
               --set image.repository=${{ env.DOCKERHUB_REPO }}/$service \
               --set image.tag=${{ env.IMAGE_TAG }} \
               --namespace default
@@ -166,8 +170,10 @@ jobs:
           
           for service in ${{ env.UNIQUE_SERVICES }}; do
             echo "Packaging and pushing chart for: $service"
-            helm package ./helm/${service}-chart # đóng gói các file manifest thành file .tgz
-            helm push ${service}-chart-*.tgz oci://registry-1.docker.io/${{ secrets.DOCKERHUB_USERNAME }} # push file .tgz vào docker hub
+            # Đóng gói các file manifest thành file .tgz
+            helm package ./helm/${service}-chart
+            # Push file .tgz vào docker hub
+            helm push ${service}-chart-*.tgz oci://registry-1.docker.io/${{ secrets.DOCKERHUB_USERNAME }}
             rm *.tgz
           done
 
