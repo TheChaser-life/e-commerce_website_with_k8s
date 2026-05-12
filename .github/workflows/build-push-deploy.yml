@@ -83,8 +83,7 @@ jobs:
             if [[ "$path" == "frontend" ]]; then 
               echo "Frontend is not a maven project"
             else 
-              mvn dependency:go-offline -pl ${path}
-              mvn clean package -DskipTests -pl ${path}
+              mvn clean package -DskipTests -f backend/${path}/pom.xml
             fi
           done
 
