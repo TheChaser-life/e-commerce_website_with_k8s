@@ -1,4 +1,5 @@
 apiVersion: v2
+# Touch comment to trigger the frontend chart pipeline.
 name: frontend
 description: A Helm chart for frontend
 type: application

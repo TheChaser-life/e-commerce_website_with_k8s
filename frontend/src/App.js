@@ -6,6 +6,7 @@ import Cart from './components/Cart';
 import Login from './components/Login';
 
 function App() {
+  // Touch comment to trigger the frontend build pipeline.
   return (
     <Router>
       <div className="App">

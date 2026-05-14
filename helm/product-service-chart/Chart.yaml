@@ -1,4 +1,5 @@
 apiVersion: v2
+# Touch comment to trigger the product service chart pipeline.
 name: product-service
 description: A Helm chart for product-service
 type: application

@@ -1,4 +1,5 @@
 apiVersion: v2
+# Touch comment to trigger the user service chart pipeline.
 name: user-service
 description: A Helm chart for user-service
 type: application

@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class OrderServiceApplication {
 
     public static void main(String[] args) {
+        // Touch comment to trigger the order service build pipeline.
         SpringApplication.run(OrderServiceApplication.class, args);
     }
 

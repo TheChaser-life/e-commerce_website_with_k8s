@@ -1,4 +1,5 @@
 apiVersion: v2
+# Touch comment to trigger the MySQL chart pipeline.
 name: mysql
 description: A Helm chart for MySQL
 type: application

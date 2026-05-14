@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class UserServiceApplication {
 
     public static void main(String[] args) {
+        // Touch comment to trigger the user service build pipeline.
         SpringApplication.run(UserServiceApplication.class, args);
     }
 

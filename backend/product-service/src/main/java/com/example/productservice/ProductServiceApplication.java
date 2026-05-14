@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ProductServiceApplication {
 
     public static void main(String[] args) {
+        // Touch comment to trigger the product service build pipeline.
         SpringApplication.run(ProductServiceApplication.class, args);
     }
 
