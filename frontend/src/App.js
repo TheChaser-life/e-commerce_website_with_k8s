@@ -1,12 +1,32 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Navigate, Routes, Route } from 'react-router-dom';
 import Home from './components/Home';
 import Products from './components/Products';
 import Cart from './components/Cart';
 import Login from './components/Login';
+import Register from './components/Register';
+
+function ProtectedRoute({ isLoggedIn, children }) {
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
 
 function App() {
-  // Touch comment to trigger the frontend build pipeline.
+  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('isLoggedIn') === 'true');
+
+  const handleLogin = () => {
+    localStorage.setItem('isLoggedIn', 'true');
+    setIsLoggedIn(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('isLoggedIn');
+    setIsLoggedIn(false);
+  };
+
   return (
     <Router>
       <div className="App">
@@ -16,15 +36,35 @@ function App() {
             <a href="/">Home</a>
             <a href="/products">Products</a>
             <a href="/cart">Cart</a>
-            <a href="/login">Login</a>
+            {isLoggedIn ? (
+              <button type="button" onClick={handleLogout}>Logout</button>
+            ) : (
+              <a href="/login">Login</a>
+            )}
+            <a href="/register">Register</a>
           </nav>
         </header>
         <main>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/login" element={<Login />} />
+            <Route
+              path="/products"
+              element={(
+                <ProtectedRoute isLoggedIn={isLoggedIn}>
+                  <Products />
+                </ProtectedRoute>
+              )}
+            />
+            <Route
+              path="/cart"
+              element={(
+                <ProtectedRoute isLoggedIn={isLoggedIn}>
+                  <Cart />
+                </ProtectedRoute>
+              )}
+            />
+            <Route path="/login" element={<Login onLogin={handleLogin} />} />
+            <Route path="/register" element={<Register />} />
           </Routes>
         </main>
       </div>
