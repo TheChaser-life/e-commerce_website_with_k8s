@@ -13,6 +13,27 @@ spec:
     - host: shopnow.local
       http:
         paths:
+          - path: /login
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80
+          - path: /register
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80
+          - path: /cart
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80
           - path: /users
             pathType: Prefix
             backend:

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Navigate, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Link, Navigate, Routes, Route } from 'react-router-dom';
 import Home from './components/Home';
 import Products from './components/Products';
 import Cart from './components/Cart';
@@ -33,15 +33,15 @@ function App() {
         <header>
           <h1>E-commerce Shop</h1>
           <nav>
-            <a href="/">Home</a>
-            <a href="/products">Products</a>
-            <a href="/cart">Cart</a>
+            <Link to="/">Home</Link>
+            <Link to="/products">Products</Link>
+            <Link to="/cart">Cart</Link>
             {isLoggedIn ? (
               <button type="button" onClick={handleLogout}>Logout</button>
             ) : (
-              <a href="/login">Login</a>
+              <Link to="/login">Login</Link>
             )}
-            <a href="/register">Register</a>
+            <Link to="/register">Register</Link>
           </nav>
         </header>
         <main>

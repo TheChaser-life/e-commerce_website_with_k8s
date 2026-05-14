@@ -6,13 +6,14 @@ function Register() {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setMessage('');
 
-    axios.post('/users/register', { username, password })
+    axios.post('/users/register', { username, password, email })
       .then(() => {
         setMessage('Account created successfully.');
         setTimeout(() => navigate('/login'), 600);
@@ -29,6 +30,13 @@ function Register() {
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          required
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           required
         />
         <input
