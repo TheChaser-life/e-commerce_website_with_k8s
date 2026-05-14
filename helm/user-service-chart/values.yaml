@@ -1,9 +1,9 @@
 replicaCount: 1
 
 image:
-  repository: your-registry/user-service
+  repository: thinhops/user-service
   tag: "latest"
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 service:
   type: ClusterIP

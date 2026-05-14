@@ -1,9 +1,9 @@
 replicaCount: 1
 
 image:
-  repository: your-registry/order-service
+  repository: thinhops/order-service
   tag: "latest"
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 service:
   type: ClusterIP

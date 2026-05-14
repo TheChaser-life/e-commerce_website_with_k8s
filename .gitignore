@@ -40,6 +40,7 @@ package-lock.json
 # Helm
 **/charts/
 **/tmp/
+helm/**/templates/secret.yaml
 
 # OS generated files
 .DS_Store

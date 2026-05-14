@@ -45,10 +45,10 @@ jobs:
         with:
           base: ${{ github.ref }}
           filters: |
-            order-service: 'helm/order-service/**'
-            product-service: 'helm/product-service/**'
-            user-service: 'helm/user-service/**'
-            frontend: 'helm/frontend/**'
+            order-service: 'helm/order-service-chart/**'
+            product-service: 'helm/product-service-chart/**'
+            user-service: 'helm/user-service-chart/**'
+            frontend: 'helm/frontend-chart/**'
 
   # job build và push image
   build-push:
