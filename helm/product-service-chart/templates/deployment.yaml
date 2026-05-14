@@ -25,8 +25,14 @@ spec:
           ports:
             - containerPort: 8081
           env:
-            - name: DB_PASSWORD
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://mysql:3306/ecommerce"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "root"
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: "update"
+            - name: SPRING_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: mysql-secret
-                  key: rootPassword
+                  key: mysql-root-password

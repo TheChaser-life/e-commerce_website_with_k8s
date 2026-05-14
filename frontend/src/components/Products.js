@@ -5,7 +5,7 @@ function Products() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:8081/products') // Assuming product service on 8081
+    axios.get('/products')
       .then(response => setProducts(response.data))
       .catch(error => console.error(error));
   }, []);

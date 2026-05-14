@@ -7,7 +7,7 @@ function Login() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios.post('http://localhost:8080/users/login', { username, password })
+    axios.post('/users/login', { username, password })
       .then(response => alert('Logged in'))
       .catch(error => alert('Login failed'));
   };
