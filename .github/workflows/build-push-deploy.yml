@@ -49,7 +49,6 @@ jobs:
             product-service: 'helm/product-service-chart/**'
             user-service: 'helm/user-service-chart/**'
             frontend: 'helm/frontend-chart/**'
-            mysql: 'helm/mysql-chart/**'
 
   # job build và push image
   build-push:
